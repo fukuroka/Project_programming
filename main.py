@@ -1,5 +1,5 @@
 import sqlite3
-from symbol import pass_stmt
+import datetime
 
 from PyQt5 import QtWidgets
 from PyQt5.QtGui import QFont, QPixmap
@@ -19,13 +19,12 @@ class Window(QMainWindow):
 
         #тут будет регистрация/вход
 
-
-
-
-        self.project_name = ''
-        self.materials_floor(1) # не забудь перейти на главное окно
+        self.current_material_index = 0
+        self.current_order_id = None  # ID текущего заказа
+        self.project_name = 'project_name'
+        #self.materials_floor(7) # не забудь перейти на главное окно
         #self.main_window()
-        #self.order()
+        self.order()
 
 
     def main_window(self):
@@ -250,13 +249,13 @@ class Window(QMainWindow):
         next_button = QPushButton("Далее", self.materials_window)
         next_button.setFixedSize(90, 40)
         next_button.move(580, 420)
+        prev_button_arrow.clicked.connect(self.type_of_wall)
 
         self.current_material_index = 0
         self.materials = self.load_materials_from_db(type_material_id)
         self.update_material_blocks()  # Обновляем оба блока
 
     def add_material_to_order(self, block_index):
-
         material_index = self.current_material_index + block_index
         if 0 <= material_index < len(self.materials):
             material_name = self.materials[material_index][0]  # Берем название материала
@@ -264,24 +263,50 @@ class Window(QMainWindow):
             try:
                 material_id = self.get_material_id(material_name)
                 if material_id:
+                    # Создаем новый заказ, если его еще нет
+                    if not self.current_order_id:
+                        self.create_new_order()
+
                     conn = sqlite3.connect("database.db")
                     cursor = conn.cursor()
 
                     cursor.execute(
-                        "INSERT INTO order_item (id_order, id_material) VALUES (?, ?)",
-                        (0, material_id)
+                        "INSERT INTO order_item (id_order, id_material, quantity) VALUES (?, ?, ?)",
+                        (self.current_order_id, material_id, 1)
                     )
                     conn.commit()
                     conn.close()
 
                     print(
-                        f"Материал '{material_name}' (id: {material_id}) добавлен в заказ (id_order пока 0).")
+                        f"Материал '{material_name}' (id: {material_id}) добавлен в заказ (id_order: {self.current_order_id}).")
+                    self.update_order_items()
                 else:
                     print(f"Ошибка: материал '{material_name}' не найден в базе данных.")
             except Exception as e:
                 print(f"Ошибка при добавлении материала в заказ: {e}")
         else:
             print("Материал не найден.")
+
+    def create_new_order(self):
+        conn = sqlite3.connect("database.db")
+        cursor = conn.cursor()
+
+        # Получаем id_project из текущего проекта
+        cursor.execute("SELECT id_project FROM room_project WHERE title = ?", (self.project_name,))
+        id_project = cursor.fetchone()[0]
+
+        # Создаем новый заказ
+        cursor.execute(
+            "INSERT INTO `order` (id_project, status, amount, order_date) VALUES (?, 'Новый', 0, ?)",
+            (id_project, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        )
+        conn.commit()
+        self.current_order_id = cursor.lastrowid  # Получаем ID последней записи
+
+        conn.close()
+
+        print(f"Создан новый заказ (id_order: {self.current_order_id}).")
+
 
     def get_material_id(self, material_name):
 
@@ -372,8 +397,6 @@ class Window(QMainWindow):
     def type_of_wall(self):
         pass
 
-    def materials_wall(self):
-        pass
 
     def order(self):
         '''self.order_window = QWidget(self)
@@ -461,24 +484,126 @@ class Window(QMainWindow):
         self.materials = self.load_order_items_from_db()
         self.update_material_blocks()  # Обновляем оба блока
 '''
-        pass
-    def load_order_items_from_db(self):
+        self.current_order_id = self.get_current_order_id()  # ID последнего созданного заказа
+        self.order_window = QWidget(self)
+        self.order_window.setWindowTitle("Заказ")
+        self.order_window.setFixedSize(700, 500)
+
+        title = QLabel("Список материалов", self.order_window)
+        title.setAlignment(Qt.AlignCenter)
+        title.setFont(QFont("Arial", 16))
+        title.setGeometry(QRect(0, 20, 700, 40))
+
+        # --- Блок 1 ---
+        self.block1_widget = QWidget(self.order_window)
+        self.block1_widget.setGeometry(QRect(50, 70, 600, 150))
+        self.block1_widget.setStyleSheet("border: 1px solid black; border-radius: 10px;")
+        self.block1_layout = QHBoxLayout(self.block1_widget)
+
+        self.block1_photo = QLabel(self.block1_widget)
+        self.block1_photo.setFixedSize(230, 130)
+        self.block1_photo.setStyleSheet("border: 1px solid black;")
+        # ... (загрузка изображения) ...
+        self.block1_photo.setAlignment(Qt.AlignCenter)
+
+        self.block1_label = QLabel(self.block1_widget)
+        self.block1_label.setAlignment(Qt.AlignLeft)
+        self.block1_label.setFixedWidth(230)
+        self.block1_label.setWordWrap(True)
+
+        self.block1_button_delete = QPushButton("Удалить", self.block1_widget)
+        self.block1_button_delete.clicked.connect(lambda: self.delete_material_from_order(0))
+        self.block1_button_delete.setFixedSize(80, 30)
+
+        self.block1_layout.addWidget(self.block1_photo)
+        self.block1_layout.addSpacing(20)
+        self.block1_layout.addWidget(self.block1_label)
+        self.block1_layout.addStretch(1)
+        self.block1_layout.addWidget(self.block1_button_delete)
+
+        # --- Блок 2 ---
+        self.block2_widget = QWidget(self.order_window)
+        self.block2_widget.setGeometry(QRect(50, 250, 600, 150))
+        self.block2_widget.setStyleSheet("border: 1px solid black; border-radius: 10px;")
+        self.block2_layout = QHBoxLayout(self.block2_widget)
+
+        self.block2_photo = QLabel(self.block2_widget)
+        self.block2_photo.setFixedSize(230, 130)
+        self.block2_photo.setStyleSheet("border: 1px solid black;")
+        # ... (загрузка изображения) ...
+        self.block2_photo.setAlignment(Qt.AlignCenter)
+
+        self.block2_label = QLabel(self.block2_widget)
+        self.block2_label.setAlignment(Qt.AlignLeft)
+        self.block2_label.setFixedWidth(230)
+        self.block2_label.setWordWrap(True)
+
+        self.block2_button_delete = QPushButton("Удалить", self.block2_widget)
+        self.block2_button_delete.clicked.connect(lambda: self.delete_material_from_order(1))
+        self.block2_button_delete.setFixedSize(80, 30)
+
+        self.block2_layout.addWidget(self.block2_photo)
+        self.block2_layout.addSpacing(20)
+        self.block2_layout.addWidget(self.block2_label)
+        self.block2_layout.addStretch(1)
+        self.block2_layout.addWidget(self.block2_button_delete)
+
+        prev_button_arrow = QPushButton("<-", self.order_window)
+        prev_button_arrow.setFixedSize(45, 20)
+        prev_button_arrow.move(50, 430)
+        prev_button_arrow.clicked.connect(self.show_previous_material)
+
+        next_button_arrow = QPushButton("->", self.order_window)
+        next_button_arrow.setFixedSize(45, 20)
+        next_button_arrow.move(100, 430)
+        next_button_arrow.clicked.connect(self.show_next_material)
+
+        back_button = QPushButton("Назад", self.order_window)
+        back_button.setFixedSize(90, 40)
+        back_button.move(480, 420)
+
+        next_button = QPushButton("Далее", self.order_window)
+        next_button.setFixedSize(90, 40)
+        next_button.move(580, 420)
+
+        self.order_id_for_display = self.current_order_id  # ID заказа для отображения материалов
+        self.materials = self.load_order_items_from_db(self.order_id_for_display)
+        self.update_material_blocks()
+
+
+
+    def load_order_items_from_db(self, order_id):
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
 
         query = """
-                    SELECT
-                        m.name, m.producer, m.length, m.width, m.price, m.count_pack, m.photo  -- Выбираем length и width
-                    FROM 
-                        order_item AS oi
-                    JOIN 
-                        material AS m ON oi.id_material = m.id_material
-                    WHERE oi.id_order = (SELECT MAX(id_order) FROM `order`)
-                """
-        cursor.execute(query)
+                            SELECT 
+                                m.name, m.producer, m.length, m.width, m.price, m.count_pack, m.photo  -- Выбираем length и width
+                            FROM 
+                                order_item AS oi
+                            JOIN 
+                                material AS m ON oi.id_material = m.id_material
+                            WHERE oi.id_order = ?
+                        """
+        cursor.execute(query, (order_id,))
         materials = cursor.fetchall()
         conn.close()
         return materials
+
+    def set_order_id_for_display(self, order_id):
+        self.order_id_for_display = order_id
+        self.materials = self.load_order_items_from_db(self.order_id_for_display)
+        self.update_material_blocks()
+
+    def get_current_order_id(self):
+        conn = sqlite3.connect("database.db")
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT MAX(id_order) FROM `order`")
+        result = cursor.fetchone()
+        conn.close()
+
+        return result[0] if result else None
 
     def delete_material_from_order(self, block_index):
         pass

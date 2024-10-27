@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5aad2128-8456-4334-a5da-d61f526dd099" name="Changes" comment="update db">
+    <list default="true" id="5aad2128-8456-4334-a5da-d61f526dd099" name="Changes" comment="добавлены новые методы">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database.db" beforeDir="false" afterPath="$PROJECT_DIR$/database.db" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
@@ -22,6 +22,11 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
@@ -52,7 +57,7 @@
     "Python.2.executor": "Run",
     "Python.main.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "master",
+    "git-widget-placeholder": "Alan",
     "last_opened_file_path": "E:/мои документы/Питон проекты/pythonProject/Телеграм бот обучение",
     "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
   }
@@ -200,7 +205,15 @@
       <option name="project" value="LOCAL" />
       <updated>1730057679083</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="добавлены новые методы">
+      <option name="closed" value="true" />
+      <created>1730060692329</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1730060692329</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -217,6 +230,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="initial commit" />
     <MESSAGE value="update db" />
-    <option name="LAST_COMMIT_MESSAGE" value="update db" />
+    <MESSAGE value="добавлены новые методы" />
+    <option name="LAST_COMMIT_MESSAGE" value="добавлены новые методы" />
   </component>
 </project>
