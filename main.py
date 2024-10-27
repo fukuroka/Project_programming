@@ -1,3 +1,5 @@
+from symbol import pass_stmt
+
 from PyQt5 import QtWidgets
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QPushButton, QWidget
@@ -12,13 +14,22 @@ class Window(QMainWindow):
         self.setWindowTitle("РосСтройТорг расчет")
         self.setFixedSize(700, 500)
 
+        #тут будет регистрация/вход
+
+
+
+
+        self.main_window() # не забудь перейти на главное окно
+
+
+    def main_window(self):
         central_widget = QWidget(self)
         self.setCentralWidget(central_widget)
 
         title = QLabel("РосСтройТорг расчет", self)
         title.setAlignment(Qt.AlignCenter)
         title.setFont(QFont("Arial", 22))
-        title.setGeometry(QRect(0, 20, 700, 50))   #позиция и размер
+        title.setGeometry(QRect(0, 20, 700, 50))  # позиция и размер
 
         projects = QLabel("Проект комнаты 1\nПроект комнаты 2\nПроект комнаты 3\nПроект комнаты 4", self)
         projects.setFont(QFont("Arial", 14))
@@ -31,6 +42,23 @@ class Window(QMainWindow):
 
         central_widget.setLayout(QtWidgets.QVBoxLayout())
 
+    def input_room(self):
+        pass
+
+    def type_of_floor(self):
+        pass
+
+    def materials_floor(self):
+        pass
+
+    def type_of_wall(self):
+        pass
+
+    def materials_wall(self):
+        pass
+
+    def order(self):
+        pass
 
 def application():
     app = QApplication(sys.argv)
