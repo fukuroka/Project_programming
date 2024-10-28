@@ -267,7 +267,7 @@ class Window(QMainWindow):
         self.block1_label.setWordWrap(True)
 
         self.block1_button_add = QPushButton("Добавить", self.block1_widget)
-        self.block1_button_add.clicked.connect(lambda: self.add_or_delete_material_from_order(0))
+        self.block1_button_add.clicked.connect(lambda: self.add_material_to_order(0))
         self.block1_button_add.setFixedSize(80, 30)
 
         self.block1_layout.addWidget(self.block1_photo)
@@ -296,7 +296,7 @@ class Window(QMainWindow):
         self.block2_label.setWordWrap(True)
 
         self.block2_button_add = QPushButton("Добавить", self.block2_widget)
-        self.block2_button_add.clicked.connect(lambda: self.add_or_delete_material_from_order(1))
+        self.block2_button_add.clicked.connect(lambda: self.add_material_to_order(1))
         self.block2_button_add.setFixedSize(80, 30)
 
         self.block2_layout.addWidget(self.block2_photo)
@@ -338,58 +338,36 @@ class Window(QMainWindow):
         self.update_material_blocks()  # Обновляем оба блока
         self.materials_window.show()
 
-    def add_or_delete_material_from_order(self, block_index):
+    def add_material_to_order(self, block_index):
         material_index = self.current_material_index + block_index
         if 0 <= material_index < len(self.materials):
-            material_name = self.materials[material_index][0]  # Берем название материала
+            material_name = self.materials[material_index][0]
 
             try:
                 material_id = self.get_material_id(material_name)
                 if material_id:
+                    # Создаем новый заказ, если его еще нет
+                    if not self.current_order_id:
+                        self.create_new_order()
+
                     conn = sqlite3.connect("database.db")
                     cursor = conn.cursor()
 
-                    # Проверяем, есть ли уже этот материал в заказе
+                    #  Добавляем материал
                     cursor.execute(
-                        "SELECT * FROM order_item WHERE id_order = ? AND id_material = ?",
-                        (self.current_order_id, material_id)
+                        "INSERT INTO order_item (id_order, id_material, quantity) VALUES (?, ?, ?)",
+                        (self.current_order_id, material_id, 1)
                     )
-                    existing_item = cursor.fetchone()
-
-                    button = self.block1_button_add if block_index == 0 else self.block2_button_add
-
-                    if existing_item:
-                        # Материал уже есть, удаляем его
-                        cursor.execute(
-                            "DELETE FROM order_item WHERE id_order = ? AND id_material = ?",
-                            (self.current_order_id, material_id)
-                        )
-                        conn.commit()
-                        print(f"Материал '{material_name}' удален из заказа (id_order: {self.current_order_id}).")
-                        button.setText("Добавить")  # Меняем текст кнопки
-
-                    else:
-                        # Создаем новый заказ, если его еще нет
-                        if not self.current_order_id:
-                            self.create_new_order()
-
-                        # Материала нет, добавляем его
-                        cursor.execute(
-                            "INSERT INTO order_item (id_order, id_material, quantity) VALUES (?, ?, ?)",
-                            (self.current_order_id, material_id, 1)
-                        )
-                        conn.commit()
-                        print(
-                            f"Материал '{material_name}' (id: {material_id}) добавлен в заказ (id_order: {self.current_order_id}).")
-                        button.setText("Удалить")  # Меняем текст кнопки
-
+                    conn.commit()
                     conn.close()
 
-                    self.update_order_items()
+                    print(f"Материал '{material_name}' добавлен в заказ.")
+
+                    self.update_order_items()  # Обновляем элементы заказа (если нужно)
                 else:
                     print(f"Ошибка: материал '{material_name}' не найден в базе данных.")
             except Exception as e:
-                print(f"Ошибка при работе с заказом: {e}")
+                print(f"Ошибка при добавлении материала в заказ: {e}")
         else:
             print("Материал не найден.")
 
