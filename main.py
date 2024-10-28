@@ -4,7 +4,7 @@ import datetime
 from PyQt5 import QtWidgets
 from PyQt5.QtGui import QFont, QPixmap
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QPushButton, QWidget, QVBoxLayout, QDialog, QLineEdit, \
-    QHBoxLayout
+    QHBoxLayout, QRadioButton
 from PyQt5.QtCore import Qt, QRect
 
 import sys
@@ -22,12 +22,14 @@ class Window(QMainWindow):
         self.current_material_index = 0
         self.current_order_id = None  # ID текущего заказа
         self.project_name = 'project_name'
-        #self.materials_floor(7) # не забудь перейти на главное окно
+        #self.materials_floor(1) # не забудь перейти на главное окно
         #self.main_window()
-        self.order()
+        #self.order()
+        self.type_of_floor()
 
 
     def main_window(self):
+        self.clear_window()
 
         central_widget = QWidget(self)
         self.setCentralWidget(central_widget)
@@ -94,9 +96,77 @@ class Window(QMainWindow):
         pass
 
     def type_of_floor(self):
-        pass
+        self.clear_window()
+        self.floor_type_window = QWidget(self)
+        self.floor_type_window.setWindowTitle(" ")
+        self.floor_type_window.setFixedSize(700, 500)
 
-    def materials_floor(self, type_material_id):
+        font = QFont("Arial", 16)
+
+        self.title_label = QLabel("Выберите вид материала для пола", self.floor_type_window)
+        self.title_label.setGeometry(0, 20, 700, 50)
+        self.title_label.setAlignment(Qt.AlignCenter)
+        self.title_label.setFont(QFont("Arial", 22))
+
+        self.radio_button1 = QRadioButton("Ламинат", self.floor_type_window)
+        self.radio_button1.setFont(font)
+        self.radio_button1.setChecked(True)
+        self.radio_button1.move(50, 170)
+
+        self.radio_button2 = QRadioButton("Паркет", self.floor_type_window)
+        self.radio_button2.setFont(font)
+        self.radio_button2.move(50, 220)
+
+        self.radio_button3 = QRadioButton("Плитка для пола", self.floor_type_window)
+        self.radio_button3.setFont(font)
+        self.radio_button3.move(50, 270)
+
+        back_button = QPushButton("Назад", self.floor_type_window)
+        back_button.setFixedSize(90, 40)
+        back_button.move(480, 420)
+
+        next_button = QPushButton("Далее", self.floor_type_window)
+        next_button.setFixedSize(90, 40)
+        next_button.move(580, 420)
+        next_button.clicked.connect(self.on_next_button_clicked)  # Подключаем обработчик
+
+        self.floor_type_window.show()
+
+    def on_next_button_clicked(self):
+        if self.radio_button1.isChecked():
+            type_material_name = "Ламинат"
+        elif self.radio_button2.isChecked():
+            type_material_name = "Паркет"
+        elif self.radio_button3.isChecked():
+            type_material_name = "Плитка для пола"
+        else:
+            type_material_name = ""  # Или какое-то значение по умолчанию
+
+        type_material_id = self.get_type_material_id_by_name(type_material_name)
+
+        if type_material_id:
+            self.materials_floor(type_material_id, 'floor')
+        else:
+            print(f"Ошибка: тип материала '{type_material_name}' не найден в базе данных.")
+            # Добавьте обработку ошибки, например, вывод сообщения пользователю
+
+    def get_type_material_id_by_name(self, type_material_name):
+        conn = sqlite3.connect("database.db")
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT id_type FROM types_material WHERE name_type = ?", (type_material_name,))
+        result = cursor.fetchone()
+        conn.close()
+
+        return result[0] if result else None
+
+    # очищение окна
+    def clear_window(self):
+        for widget in self.children():
+            if isinstance(widget, QWidget) and widget != self.centralWidget():
+                widget.deleteLater()
+
+    def materials_floor(self, type_material_id, source):
 
         '''type_material_name = self.get_type_material_name(type_material_id)
 
@@ -163,6 +233,9 @@ class Window(QMainWindow):
         self.current_material_index = 0
         self.materials = self.load_materials_from_db(type_material_id)
         self.update_material_blocks()  # Обновляем оба блока'''
+
+        self.clear_window()
+
         type_material_name = self.get_type_material_name(type_material_id)
 
         self.materials_window = QWidget(self)
@@ -194,7 +267,7 @@ class Window(QMainWindow):
         self.block1_label.setWordWrap(True)
 
         self.block1_button_add = QPushButton("Добавить", self.block1_widget)
-        self.block1_button_add.clicked.connect(lambda: self.add_material_to_order(0))
+        self.block1_button_add.clicked.connect(lambda: self.add_or_delete_material_from_order(0))
         self.block1_button_add.setFixedSize(80, 30)
 
         self.block1_layout.addWidget(self.block1_photo)
@@ -223,7 +296,7 @@ class Window(QMainWindow):
         self.block2_label.setWordWrap(True)
 
         self.block2_button_add = QPushButton("Добавить", self.block2_widget)
-        self.block2_button_add.clicked.connect(lambda: self.add_material_to_order(1))
+        self.block2_button_add.clicked.connect(lambda: self.add_or_delete_material_from_order(1))
         self.block2_button_add.setFixedSize(80, 30)
 
         self.block2_layout.addWidget(self.block2_photo)
@@ -245,17 +318,82 @@ class Window(QMainWindow):
         back_button = QPushButton("Назад", self.materials_window)
         back_button.setFixedSize(90, 40)
         back_button.move(480, 420)
+        if source == 'floor':
+            back_button.clicked.connect(self.type_of_floor)  # Возвращаемся к type_of_floor
+        elif source == 'wall':
+            back_button.clicked.connect(self.type_of_wall)  # Возвращаемся к type_of_wall
 
         next_button = QPushButton("Далее", self.materials_window)
         next_button.setFixedSize(90, 40)
         next_button.move(580, 420)
-        prev_button_arrow.clicked.connect(self.type_of_wall)
+        if source == 'floor':
+            next_button.clicked.connect(self.type_of_wall)  # Ведем к type_of_wall
+        elif source == 'wall':
+            next_button.clicked.connect(self.order)  # Ведем к order
+
+
 
         self.current_material_index = 0
         self.materials = self.load_materials_from_db(type_material_id)
         self.update_material_blocks()  # Обновляем оба блока
+        self.materials_window.show()
 
-    def add_material_to_order(self, block_index):
+    def add_or_delete_material_from_order(self, block_index):
+        material_index = self.current_material_index + block_index
+        if 0 <= material_index < len(self.materials):
+            material_name = self.materials[material_index][0]  # Берем название материала
+
+            try:
+                material_id = self.get_material_id(material_name)
+                if material_id:
+                    conn = sqlite3.connect("database.db")
+                    cursor = conn.cursor()
+
+                    # Проверяем, есть ли уже этот материал в заказе
+                    cursor.execute(
+                        "SELECT * FROM order_item WHERE id_order = ? AND id_material = ?",
+                        (self.current_order_id, material_id)
+                    )
+                    existing_item = cursor.fetchone()
+
+                    button = self.block1_button_add if block_index == 0 else self.block2_button_add
+
+                    if existing_item:
+                        # Материал уже есть, удаляем его
+                        cursor.execute(
+                            "DELETE FROM order_item WHERE id_order = ? AND id_material = ?",
+                            (self.current_order_id, material_id)
+                        )
+                        conn.commit()
+                        print(f"Материал '{material_name}' удален из заказа (id_order: {self.current_order_id}).")
+                        button.setText("Добавить")  # Меняем текст кнопки
+
+                    else:
+                        # Создаем новый заказ, если его еще нет
+                        if not self.current_order_id:
+                            self.create_new_order()
+
+                        # Материала нет, добавляем его
+                        cursor.execute(
+                            "INSERT INTO order_item (id_order, id_material, quantity) VALUES (?, ?, ?)",
+                            (self.current_order_id, material_id, 1)
+                        )
+                        conn.commit()
+                        print(
+                            f"Материал '{material_name}' (id: {material_id}) добавлен в заказ (id_order: {self.current_order_id}).")
+                        button.setText("Удалить")  # Меняем текст кнопки
+
+                    conn.close()
+
+                    self.update_order_items()
+                else:
+                    print(f"Ошибка: материал '{material_name}' не найден в базе данных.")
+            except Exception as e:
+                print(f"Ошибка при работе с заказом: {e}")
+        else:
+            print("Материал не найден.")
+
+    '''def add_material_to_order(self, block_index):
         material_index = self.current_material_index + block_index
         if 0 <= material_index < len(self.materials):
             material_name = self.materials[material_index][0]  # Берем название материала
@@ -285,7 +423,7 @@ class Window(QMainWindow):
             except Exception as e:
                 print(f"Ошибка при добавлении материала в заказ: {e}")
         else:
-            print("Материал не найден.")
+            print("Материал не найден.")'''
 
     def create_new_order(self):
         conn = sqlite3.connect("database.db")
@@ -395,7 +533,58 @@ class Window(QMainWindow):
             self.update_material_blocks()
 
     def type_of_wall(self):
-        pass
+        self.clear_window()
+        self.wall_type_window = QWidget(self)
+        self.wall_type_window.setFixedSize(700, 500)
+
+        font = QFont("Arial", 16)
+
+        self.title_label = QLabel("Выберите вид материала для стен", self.wall_type_window)
+        self.title_label.setGeometry(0, 20, 700, 50)
+        self.title_label.setAlignment(Qt.AlignCenter)
+        self.title_label.setFont(QFont("Arial", 22))
+
+        self.radio_button1 = QRadioButton("Обои", self.wall_type_window)
+        self.radio_button1.setFont(font)
+        self.radio_button1.setChecked(True)
+        self.radio_button1.move(50, 170)
+
+        self.radio_button2 = QRadioButton("Мозаика", self.wall_type_window)
+        self.radio_button2.setFont(font)
+        self.radio_button2.move(50, 220)
+
+        self.radio_button3 = QRadioButton("Плитка для стен", self.wall_type_window)
+        self.radio_button3.setFont(font)
+        self.radio_button3.move(50, 270)
+
+        back_button = QPushButton("Назад", self.wall_type_window)
+        back_button.setFixedSize(90, 40)
+        back_button.move(480, 420)
+
+        next_button = QPushButton("Далее", self.wall_type_window)
+        next_button.setFixedSize(90, 40)
+        next_button.move(580, 420)
+        next_button.clicked.connect(self.on_next_button_clicked_wall)  # Подключаем обработчик
+
+        self.wall_type_window.show()
+
+    def on_next_button_clicked_wall(self):
+        if self.radio_button1.isChecked():
+            type_material_name = "Обои"
+        elif self.radio_button2.isChecked():
+            type_material_name = "Мозаика"
+        elif self.radio_button3.isChecked():
+            type_material_name = "Плитка для стен"
+        else:
+            type_material_name = ""  # Или какое-то значение по умолчанию
+
+        type_material_id = self.get_type_material_id_by_name(type_material_name)
+
+        if type_material_id:
+            self.materials_floor(type_material_id, 'wall')
+        else:
+            print(f"Ошибка: тип материала '{type_material_name}' не найден в базе данных.")
+            # Добавьте обработку ошибки, например, вывод сообщения пользователю
 
 
     def order(self):
@@ -484,6 +673,7 @@ class Window(QMainWindow):
         self.materials = self.load_order_items_from_db()
         self.update_material_blocks()  # Обновляем оба блока
 '''
+        self.clear_window()
         self.current_order_id = self.get_current_order_id()  # ID последнего созданного заказа
         self.order_window = QWidget(self)
         self.order_window.setWindowTitle("Заказ")
@@ -503,7 +693,6 @@ class Window(QMainWindow):
         self.block1_photo = QLabel(self.block1_widget)
         self.block1_photo.setFixedSize(230, 130)
         self.block1_photo.setStyleSheet("border: 1px solid black;")
-        # ... (загрузка изображения) ...
         self.block1_photo.setAlignment(Qt.AlignCenter)
 
         self.block1_label = QLabel(self.block1_widget)
@@ -530,7 +719,6 @@ class Window(QMainWindow):
         self.block2_photo = QLabel(self.block2_widget)
         self.block2_photo.setFixedSize(230, 130)
         self.block2_photo.setStyleSheet("border: 1px solid black;")
-        # ... (загрузка изображения) ...
         self.block2_photo.setAlignment(Qt.AlignCenter)
 
         self.block2_label = QLabel(self.block2_widget)
@@ -562,13 +750,15 @@ class Window(QMainWindow):
         back_button.setFixedSize(90, 40)
         back_button.move(480, 420)
 
-        next_button = QPushButton("Далее", self.order_window)
+        next_button = QPushButton("Заказать", self.order_window)
         next_button.setFixedSize(90, 40)
         next_button.move(580, 420)
 
         self.order_id_for_display = self.current_order_id  # ID заказа для отображения материалов
         self.materials = self.load_order_items_from_db(self.order_id_for_display)
         self.update_material_blocks()
+
+        self.order_window.show()
 
 
 
@@ -578,7 +768,7 @@ class Window(QMainWindow):
 
         query = """
                             SELECT 
-                                m.name, m.producer, m.length, m.width, m.price, m.count_pack, m.photo  -- Выбираем length и width
+                                m.name, m.producer, m.length, m.width, m.price, m.count_pack, m.photo  
                             FROM 
                                 order_item AS oi
                             JOIN 
@@ -606,7 +796,34 @@ class Window(QMainWindow):
         return result[0] if result else None
 
     def delete_material_from_order(self, block_index):
-        pass
+        material_index = self.current_material_index + block_index
+        if 0 <= material_index < len(self.materials):
+            material_name = self.materials[material_index][0]
+            try:
+                material_id = self.get_material_id(material_name)
+                if material_id:
+                    conn = sqlite3.connect("database.db")
+                    cursor = conn.cursor()
+
+                    # Удаляем материал из заказа
+                    cursor.execute(
+                        "DELETE FROM order_item WHERE id_order = ? AND id_material = ?",
+                        (self.current_order_id, material_id)
+                    )
+                    conn.commit()
+                    conn.close()
+
+                    print(f"Материал '{material_name}' удален из заказа (id_order: {self.current_order_id}).")
+
+                    # Обновляем список материалов и блоки
+                    self.materials = self.load_order_items_from_db(self.current_order_id)
+                    self.update_material_blocks()
+                else:
+                    print(f"Ошибка: материал '{material_name}' не найден в базе данных.")
+            except Exception as e:
+                print(f"Ошибка при удалении материала из заказа: {e}")
+        else:
+            print("Материал не найден.")
 
 
 def application():

@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5aad2128-8456-4334-a5da-d61f526dd099" name="Changes" comment="добавлены новые методы">
+    <list default="true" id="5aad2128-8456-4334-a5da-d61f526dd099" name="Changes" comment="correct method order(adding new order to db)">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database.db" beforeDir="false" afterPath="$PROJECT_DIR$/database.db" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
@@ -50,18 +50,18 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python.12.executor": "Debug",
-    "Python.1234.executor": "Run",
-    "Python.2.executor": "Run",
-    "Python.main.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "Alan",
-    "last_opened_file_path": "E:/мои документы/Питон проекты/pythonProject/Телеграм бот обучение",
-    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.12.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.1234.executor&quot;: &quot;Run&quot;,
+    &quot;Python.2.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;Alan&quot;,
+    &quot;last_opened_file_path&quot;: &quot;E:/мои документы/Питон проекты/pythonProject/Телеграм бот обучение&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="E:\мои документы\Питон проекты\Проект_проограммирование" />
@@ -159,8 +159,8 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.main" />
-        <item itemvalue="Python.1234" />
         <item itemvalue="Python.2" />
+        <item itemvalue="Python.1234" />
         <item itemvalue="Python.12" />
       </list>
     </recent_temporary>
@@ -213,7 +213,15 @@
       <option name="project" value="LOCAL" />
       <updated>1730060692329</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="correct method order(adding new order to db)">
+      <option name="closed" value="true" />
+      <created>1730063602317</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1730063602317</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -231,6 +239,7 @@
     <MESSAGE value="initial commit" />
     <MESSAGE value="update db" />
     <MESSAGE value="добавлены новые методы" />
-    <option name="LAST_COMMIT_MESSAGE" value="добавлены новые методы" />
+    <MESSAGE value="correct method order(adding new order to db)" />
+    <option name="LAST_COMMIT_MESSAGE" value="correct method order(adding new order to db)" />
   </component>
 </project>
