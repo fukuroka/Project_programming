@@ -7,6 +7,8 @@ from PyQt5.QtGui import QFont, QPixmap
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QPushButton, QWidget, QVBoxLayout, QDialog, QLineEdit, \
     QHBoxLayout, QRadioButton
 from PyQt5.QtCore import Qt, QRect
+from PyQt5.QtGui import QDesktopServices
+from PyQt5.QtCore import QUrl
 
 import sys
 
@@ -1017,6 +1019,12 @@ class Window(QMainWindow):
         next_button = QPushButton("Заказать", self.order_window)
         next_button.setFixedSize(90, 40)
         next_button.move(580, 455)
+
+        base_url = "http://127.0.0.1:8000/site/order_summary/"
+        query = f"user_id={self.current_user_id}&project_name={self.project_name}&order_id={self.current_order_id}"
+        full_url = f"{base_url}?{query}"
+
+        next_button.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(full_url)))
 
         self.total_cost_label = QLabel("Общая стоимость заказа: ", self.order_window)
         self.total_cost_label.setGeometry(QRect(150, 470, 300, 20))

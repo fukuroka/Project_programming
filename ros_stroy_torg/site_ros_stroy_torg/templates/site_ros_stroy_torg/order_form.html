@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Заказ №{{ order_data.0 }}</title>
+    <!-- Подключаем Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    {% load static %}
+
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Заказ №{{ order_data.0 }}</h1>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Информация о пользователе</h5>
+                <p class="card-text"><strong>Имя:</strong> {{ user_data.1 }}</p>
+                <p class="card-text"><strong>Фамилия:</strong> {{ user_data.2 }}</p>
+                <p class="card-text"><strong>Отчество:</strong> {{ user_data.3 }}</p>
+                <p class="card-text"><strong>Email:</strong> {{ user_data.4 }}</p>
+                <p class="card-text"><strong>Телефон:</strong> {{ user_data.5 }}</p>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Информация о проекте</h5>
+                <p class="card-text"><strong>Название проекта:</strong> {{ project_data.5 }}</p>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Информация о заказе</h5>
+                <p class="card-text"><strong>Дата заказа:</strong> {{ order_data.4 }}</p>
+                <p class="card-text"><strong>Стоимость заказа:</strong> {{ order_data.3 }} руб.</p>
+            </div>
+        </div>
+
+        <h2 class="mt-4">Материалы:</h2>
+        <div class="row">
+            {% for material in materials_data %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <img src="{{ MEDIA_URL }}{{ material.9 }}" class="card-img-top" alt="Изображение {{ material.1 }}" />
+                    <div class="card-body">
+                        <h5 class="card-title">{{ material.1 }}</h5>
+                        <p class="card-text"><strong>Количество упаковок: </strong> {{ material.10 }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="{% url 'site_ros_stroy_torg:order_success' %}" class="btn btn-success btn-lg">Заказать</a>
+        </div>
+
+    </div>
+</body>
+</html>
