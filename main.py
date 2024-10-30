@@ -1105,7 +1105,7 @@ class Window(QMainWindow):
 
                     # Обновляем список материалов и блоки
                     self.materials = self.load_order_items_from_db(self.current_order_id)
-                    self.update_material_blocks()
+                    self.order()
                 else:
                     print(f"Ошибка: материал '{material_name}' не найден в базе данных.")
             except Exception as e:
