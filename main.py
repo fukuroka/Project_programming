@@ -26,12 +26,7 @@ class Window(QMainWindow):
         self.current_user_id = 0
         self.previous_material_type_id = None
 
-        # self.materials_floor(1) # не забудь перейти на главное окно
-        # self.main_window()
-        # self.order()
-        # self.type_of_floor()
         self.login()
-        # self.input_room()
 
     def login(self):
         self.clear_window()
